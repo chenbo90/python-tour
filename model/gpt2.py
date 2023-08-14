@@ -38,6 +38,9 @@ GPT2Config {
 model = GPT2Model(configuration)
 print(model)
 
+state_dict = model.state_dict().keys()
+print(state_dict)
+
 # Accessing the model configuration
 configuration = model.config
 print(configuration)
