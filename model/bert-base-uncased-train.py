@@ -11,13 +11,14 @@ print(inputs)
 '''
 
 #然后将第一步的结果作为模型的入参
-model(**inputs).logits.argmax(dim=-1)
+argmax = model(**inputs).logits.argmax(dim=-1)
 '''
 tensor([[1012, 4083, 2003, 1037, 2200, 3407, 2832, 1012, 1012]])
 '''
 
 #转换id到词
-tokenizer.convert_ids_to_tokens(2832)
+tokens = tokenizer.convert_ids_to_tokens(2832)
+print(tokens)
 '''
 'process'    #这里我们得到了和页面同样的数据
 '''
