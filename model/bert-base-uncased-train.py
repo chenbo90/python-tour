@@ -23,3 +23,23 @@ print(tokens)
 'process'    #这里我们得到了和页面同样的数据
 '''
 
+
+print(model.bert)
+outputs = model.bert(**inputs)
+print(outputs)
+print(outputs.last_hidden_state.size())
+
+import torch
+from torch import nn# 定义最后的二分类线性层
+cls = nn.Sequential(nn.Linear(768, 1),nn.Sigmoid()
+)
+# 使用二分类常用的Binary Cross Entropy Loss
+criteria = nn.BCELoss()
+# 这里只对最后的线性层做参数更新
+optimizer = torch.optim.SGD(cls.parameters(), lr=0.1)
+# 取隐层的第一个token(<bos>)的输出作为cls层的输入，然后与label进行损失计算
+loss = criteria(cls(outputs.last_hidden_state[:, 0, :]), torch.FloatTensor([[1]]))
+loss.backward()
+optimizer.step()
+optimizer.zero_grad()
+
