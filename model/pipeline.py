@@ -4,4 +4,7 @@ unmasker = pipeline("fill-mask",model = "bert-base-uncased")  # 这里引入了�
 l = unmasker("The goal of life is [MASK].", top_k=5)
 print(l)
 
+translator = pipeline("translation_en_to_fr")
+print(translator("How old are you?"))
+
 
