@@ -12,6 +12,11 @@ if framework == "pt":
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     print(model)
 elif framework == "tf":
+    '''
+    由于我们机器没有TensorFlow环境，所以当设置为tf时，会报错，无法转换输出的分词向量是tf
+    ImportError: Unable to convert output to TensorFlow tensors format, 
+    TensorFlow is not installed.
+    '''
     model = TFAutoModel.from_pretrained(model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     print(model)
