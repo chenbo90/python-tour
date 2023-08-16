@@ -38,4 +38,4 @@ logits = model(input_ids, attention_mask)
 
 # 打印预测结果
 predicted_class = torch.argmax(logits, dim=1).item()
-print("Predicted Class:", predicted_class)
+print("Predicted Class:", predicted_class) #0-积极 1-消极
