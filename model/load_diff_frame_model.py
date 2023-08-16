@@ -10,11 +10,14 @@ model_name = "bert-base-uncased"
 if framework == "pt":
     model = AutoModel.from_pretrained(model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
+    print(model)
 elif framework == "tf":
     model = TFAutoModel.from_pretrained(model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
+    print(model)
 elif framework == "jax":
     model = FlaxAutoModel.from_pretrained(model_name)
+    print(model)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 else:
     raise ValueError("Unsupported framework")
