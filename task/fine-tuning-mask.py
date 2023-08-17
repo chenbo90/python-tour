@@ -187,6 +187,7 @@ for batch in train_dataloader:
     break
 
 import collections
+import numpy as np
 from transformers import default_data_collator
 
 wwm_probability = 0.2
