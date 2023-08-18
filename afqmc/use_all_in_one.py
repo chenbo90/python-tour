@@ -1,7 +1,7 @@
 # from all_in_one import test_loop
 import all_in_one as ai
 import torch
-from transformers import AutoConfig,BertForPairwiseCLS,AutoTokenizer
+from transformers import AutoConfig,AutoTokenizer
 checkpoint = "bert-base-chinese"
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 
