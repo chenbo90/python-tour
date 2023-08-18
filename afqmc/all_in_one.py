@@ -193,7 +193,15 @@ Valid Accuracy: 73.9%
 saving new weights...
 
 Done!
+
+(p3106) [root@k8s-master afqmc]# ll
+total 1191820
+-rw-r--r--. 1 root root      6398 Aug 18 16:51 all_in_one.py
+-rw-r--r--. 1 root root      4627 Aug 18 15:17 data.py
+-rw-r--r--. 1 root root 406800696 Aug 18 16:15 epoch_1_valid_acc_72.6_model_weights.bin
+-rw-r--r--. 1 root root 406800696 Aug 18 16:27 epoch_2_valid_acc_73.4_model_weights.bin
+-rw-r--r--. 1 root root 406800696 Aug 18 16:38 epoch_3_valid_acc_73.9_model_weights.bin
 '''
 
-model.load_state_dict(torch.load('epoch_3_valid_acc_74.1_model_weights.bin'))
+model.load_state_dict(torch.load('epoch_3_valid_acc_73.9_model_weights.bin'))
 test_loop(valid_dataloader, model, mode='Test')
