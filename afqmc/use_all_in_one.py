@@ -12,4 +12,4 @@ print(f'Using {device} device')
 # model = BertForPairwiseCLS.from_pretrained(checkpoint, config=config).to(device)
 
 ai.model.load_state_dict(torch.load('epoch_3_valid_acc_73.9_model_weights.bin'))
-ai.test_loop(valid_dataloader, ai.model, mode='Test')
+ai.test_loop(ai.valid_dataloader, ai.model, mode='Test')
