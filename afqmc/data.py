@@ -92,3 +92,6 @@ config = AutoConfig.from_pretrained(checkpoint)
 model = BertForPairwiseCLS.from_pretrained(checkpoint, config=config).to(device)
 print(model)
 
+outputs = model(batch_X)
+print(outputs.shape)
+
