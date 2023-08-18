@@ -1,3 +1,10 @@
+'''
+from:
+https://transformers.run/intro/2021-12-17-transformers-note-4/
+
+code github: https://github.com/jsksxs360/How-to-use-Transformers/tree/main/src/pairwise_cls_similarity_afqmc
+'''
+
 import random
 import os
 import numpy as np
@@ -142,23 +149,51 @@ def test_loop(dataloader, model, mode='Test'):
     return correct
 
 
-loss_fn = nn.CrossEntropyLoss()
-optimizer = AdamW(model.parameters(), lr=learning_rate)
-lr_scheduler = get_scheduler(
-    "linear",
-    optimizer=optimizer,
-    num_warmup_steps=0,
-    num_training_steps=epoch_num * len(train_dataloader),
-)
+# loss_fn = nn.CrossEntropyLoss()
+# optimizer = AdamW(model.parameters(), lr=learning_rate)
+# lr_scheduler = get_scheduler(
+#     "linear",
+#     optimizer=optimizer,
+#     num_warmup_steps=0,
+#     num_training_steps=epoch_num * len(train_dataloader),
+# )
+#
+# total_loss = 0.
+# best_acc = 0.
+# for t in range(epoch_num):
+#     print(f"Epoch {t + 1}/{epoch_num}\n-------------------------------")
+#     total_loss = train_loop(train_dataloader, model, loss_fn, optimizer, lr_scheduler, t + 1, total_loss)
+#     valid_acc = test_loop(valid_dataloader, model, mode='Valid')
+#     if valid_acc > best_acc:
+#         best_acc = valid_acc
+#         print('saving new weights...\n')
+#         torch.save(model.state_dict(), f'epoch_{t + 1}_valid_acc_{(100 * valid_acc):0.1f}_model_weights.bin')
+# print("Done!")
 
-total_loss = 0.
-best_acc = 0.
-for t in range(epoch_num):
-    print(f"Epoch {t + 1}/{epoch_num}\n-------------------------------")
-    total_loss = train_loop(train_dataloader, model, loss_fn, optimizer, lr_scheduler, t + 1, total_loss)
-    valid_acc = test_loop(valid_dataloader, model, mode='Valid')
-    if valid_acc > best_acc:
-        best_acc = valid_acc
-        print('saving new weights...\n')
-        torch.save(model.state_dict(), f'epoch_{t + 1}_valid_acc_{(100 * valid_acc):0.1f}_model_weights.bin')
-print("Done!")
+'''
+Epoch 1/3
+-------------------------------
+loss: 0.562499: 100%|██████████████████████████████████████████████████████████████████████| 8584/8584 [12:03<00:00, 11.87it/s]
+Valid Accuracy: 72.6%
+
+saving new weights...
+
+Epoch 2/3
+-------------------------------
+loss: 0.510235: 100%|██████████████████████████████████████████████████████████████████████| 8584/8584 [11:11<00:00, 12.79it/s]
+Valid Accuracy: 73.4%
+
+saving new weights...
+
+Epoch 3/3
+-------------------------------
+loss: 0.458185: 100%|██████████████████████████████████████████████████████████████████████| 8584/8584 [11:27<00:00, 12.49it/s]
+Valid Accuracy: 73.9%
+
+saving new weights...
+
+Done!
+'''
+
+model.load_state_dict(torch.load('epoch_3_valid_acc_74.1_model_weights.bin'))
+test_loop(valid_dataloader, model, mode='Test')
