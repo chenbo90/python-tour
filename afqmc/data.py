@@ -21,7 +21,7 @@ class AFQMC(Dataset):
         return self.data[idx]
 
 
-train_data = AFQMC('data/afqmc_public/train.json')
-valid_data = AFQMC('data/afqmc_public/dev.json')
+train_data = AFQMC('/root/chenbo/data/afqmc_public/train.json')
+valid_data = AFQMC('/root/chenbo/data/afqmc_public/dev.json')
 
 print(train_data[0])
