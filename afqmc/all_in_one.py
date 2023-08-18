@@ -1,5 +1,38 @@
-from torch.utils.data import Dataset
+import random
+import os
+import numpy as np
 import json
+import torch
+from torch import nn
+from torch.utils.data import Dataset, DataLoader
+from transformers import AutoTokenizer, AutoConfig
+from transformers import BertPreTrainedModel, BertModel
+from transformers import AdamW, get_scheduler
+from tqdm.auto import tqdm
+
+
+def seed_everything(seed=1029):
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    # some cudnn methods can be random even after fixing the seed
+    # unless you tell it to be deterministic
+    torch.backends.cudnn.deterministic = True
+
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print(f'Using {device} device')
+seed_everything(42)
+
+learning_rate = 1e-5
+batch_size = 4
+epoch_num = 3
+
+checkpoint = "bert-base-chinese"
+tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 
 
 class AFQMC(Dataset):
@@ -21,22 +54,9 @@ class AFQMC(Dataset):
         return self.data[idx]
 
 
-train_data = AFQMC('/root/chenbo/data/afqmc_public/train.json')
-valid_data = AFQMC('/root/chenbo/data/afqmc_public/dev.json')
+train_data = AFQMC('data/afqmc_public/train.json')
+valid_data = AFQMC('data/afqmc_public/dev.json')
 
-print(train_data[0])
-
-'''
-{'sentence1': '蚂蚁借呗等额还款可以换成先息后本吗', 'sentence2': '借呗有先息到期还本吗', 'label': '0'}
-'''
-
-#2-batch data
-import torch
-from torch.utils.data import DataLoader
-from transformers import AutoTokenizer
-
-checkpoint = "bert-base-chinese"
-tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 
 def collote_fn(batch_samples):
     batch_sentence_1, batch_sentence_2 = [], []
@@ -55,22 +75,9 @@ def collote_fn(batch_samples):
     y = torch.tensor(batch_label)
     return X, y
 
-train_dataloader = DataLoader(train_data, batch_size=4, shuffle=True, collate_fn=collote_fn)
-valid_dataloader = DataLoader(valid_data, batch_size=4, shuffle=True, collate_fn=collote_fn)
 
-batch_X, batch_y = next(iter(train_dataloader))
-print('batch_X shape:', {k: v.shape for k, v in batch_X.items()})
-print('batch_y shape:', batch_y.shape)
-print(batch_X)
-print(batch_y)
-
-#2-构建模型
-from torch import nn
-from transformers import AutoConfig
-from transformers import BertPreTrainedModel, BertModel
-
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-print(f'Using {device} device')
+train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True, collate_fn=collote_fn)
+valid_dataloader = DataLoader(valid_data, batch_size=batch_size, shuffle=False, collate_fn=collote_fn)
 
 
 class BertForPairwiseCLS(BertPreTrainedModel):
@@ -82,8 +89,8 @@ class BertForPairwiseCLS(BertPreTrainedModel):
         self.post_init()
 
     def forward(self, x):
-        bert_output = self.bert(**x)
-        cls_vectors = bert_output.last_hidden_state[:, 0, :]
+        outputs = self.bert(**x)
+        cls_vectors = outputs.last_hidden_state[:, 0, :]
         cls_vectors = self.dropout(cls_vectors)
         logits = self.classifier(cls_vectors)
         return logits
@@ -91,14 +98,6 @@ class BertForPairwiseCLS(BertPreTrainedModel):
 
 config = AutoConfig.from_pretrained(checkpoint)
 model = BertForPairwiseCLS.from_pretrained(checkpoint, config=config).to(device)
-print(model)
-
-outputs = model(batch_X)
-print(outputs.shape)
-
-#2-2优化模型参数
-
-from tqdm.auto import tqdm
 
 
 def train_loop(dataloader, model, loss_fn, optimizer, lr_scheduler, epoch, total_loss):
@@ -137,11 +136,8 @@ def test_loop(dataloader, model, mode='Test'):
 
     correct /= size
     print(f"{mode} Accuracy: {(100 * correct):>0.1f}%\n")
+    return correct
 
-from transformers import AdamW, get_scheduler
-
-learning_rate = 1e-5
-epoch_num = 3
 
 loss_fn = nn.CrossEntropyLoss()
 optimizer = AdamW(model.parameters(), lr=learning_rate)
@@ -149,14 +145,17 @@ lr_scheduler = get_scheduler(
     "linear",
     optimizer=optimizer,
     num_warmup_steps=0,
-    num_training_steps=epoch_num*len(train_dataloader),
+    num_training_steps=epoch_num * len(train_dataloader),
 )
 
 total_loss = 0.
+best_acc = 0.
 for t in range(epoch_num):
-    print(f"Epoch {t+1}/{epoch_num}\n-------------------------------")
-    total_loss = train_loop(train_dataloader, model, loss_fn, optimizer, lr_scheduler, t+1, total_loss)
-    test_loop(valid_dataloader, model, mode='Valid')
+    print(f"Epoch {t + 1}/{epoch_num}\n-------------------------------")
+    total_loss = train_loop(train_dataloader, model, loss_fn, optimizer, lr_scheduler, t + 1, total_loss)
+    valid_acc = test_loop(valid_dataloader, model, mode='Valid')
+    if valid_acc > best_acc:
+        best_acc = valid_acc
+        print('saving new weights...\n')
+        torch.save(model.state_dict(), f'epoch_{t + 1}_valid_acc_{(100 * valid_acc):0.1f}_model_weights.bin')
 print("Done!")
-
-
