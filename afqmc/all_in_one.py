@@ -203,6 +203,7 @@ total 1191820
 -rw-r--r--. 1 root root 406800696 Aug 18 16:38 epoch_3_valid_acc_73.9_model_weights.bin
 '''
 
-state_dict = model.load_state_dict(torch.load('epoch_3_valid_acc_73.9_model_weights.bin'))
-test_loop(valid_dataloader, model, mode='Test')
-print(state_dict)
+#测试
+# state_dict = model.load_state_dict(torch.load('epoch_3_valid_acc_73.9_model_weights.bin'))
+# test_loop(valid_dataloader, model, mode='Test')
+# print(state_dict)
